@@ -48,7 +48,11 @@ class UserController {
         
     }
 
-    deleteUser(req,res){
+    deleteUserById(req,res){
+
+    }
+
+    updateUserById(req,res){
 
     }
 

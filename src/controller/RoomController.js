@@ -20,6 +20,29 @@ class RoomController {
 
     }
 
+    deleteRoomById(req=request,res=response){
+      
+        const {id} = req.params;
+        console.log('id '+id);
+        const room = roomData.rooms.find(u => u.id == id);
+        console.log('room'+ room);
+        res.status(200);
+        res.json(room);
+  
+    }
+    
+    updateRoomById(req=request,res=response){
+      
+    const {id} = req.params;
+    console.log('id '+id);
+    const room = roomData.rooms.find(u => u.id == id);
+    console.log('room'+ room);
+    res.status(200);
+    res.json(room);
+
+
+    }
+
 
     createRoom(req=request,res=response){
   
