@@ -8,3 +8,6 @@ Desarrollo de una aplicación web para gestionar los usuarios y seleccionar sala
 - inicializar servidor front: npm run start
 - inicializar servidor back: npm run node-watch
 
+# install mongoose
+* https://mongoosejs.com/docs/index.html
+

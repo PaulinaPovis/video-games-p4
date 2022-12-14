@@ -1,5 +1,6 @@
 const  {userData} = require('../data/UserData');
 const { request, response } = require('express');
+const { Users } = require('../database/schema/Users');
 class UserController {
 
 
@@ -20,7 +21,18 @@ class UserController {
 
     createUser(req=request,res=response){
 
-        
+        console.log('# start creating user with mongodb ........');
+
+        const users = new Users( {id:1345,userName:'pinpixxxxxxxxxnli',email:'pinpin@pin.com'});
+        users.save(function (err) {
+            if (err) return handleError(err);
+            console.log('user created ....');
+          });
+
+
+        console.log('# end creating user with mongodb');
+
+
         const user =  req.body;
         // obtener un id randon 
         user.id=Math.floor(Math.random() * 1000000) + 10;

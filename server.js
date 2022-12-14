@@ -10,6 +10,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const gameJson = require("./gamesJson.json");
+const { connection } = require('./src/database/Connection');
+
 
 
 
@@ -35,6 +37,9 @@ httpServer.listen(3000);
 app.use('/api',require('./src/route/UserRouters'));
 app.use('/api',require('./src/route/RoomRouters'));
 app.use('/api',require('./src/route/GameRouters'));
+
+connection.connectToDB();
+
 
 io.on('connection', (socket) => {
     console.log('new connection', socket.id);
