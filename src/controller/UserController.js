@@ -3,23 +3,36 @@ const { request, response } = require("express");
 const { Users } = require("../database/schema/Users");
 const { mongoose } = require("mongoose");
 class UserController {
-  
   async getAllUsers(req, res = response) {
-    
     res.status(200);
-    //const users = Users;
+    // retorna todos los usuarios
     const users = await Users.find({});
     res.json(users);
-
   }
 
-  getUserById(req = request, res = response) {
+  /**
+   * Retorna un usuario por el id
+   * @param {*} req
+   * @param {*} res
+   */
+  async getUserById(req = request, res = response) {
     const { id } = req.params;
-    const user = userData.users.find((u) => u.id == id);
-    res.status(200);
-    res.json(user);
+    try {
+      const user = await Users.findById(id).exec();
+      res.status(200);
+      res.json(user);
+    } catch (e) {
+      console.error(e);
+      res.status(400);
+      res.json({ msg: "User not found by id " + id });
+    }
   }
 
+  /**
+   * crea un usuario
+   * @param {*} req
+   * @param {*} res
+   */
   async createUser(req = request, res = response) {
     try {
       console.log("# end creating user with mongodb");
@@ -34,11 +47,10 @@ class UserController {
       });
       // guardando el objecto users en mongo
       await users.save();
-      users.id=users._id; 
+      users.id = users._id;
       res.status(201);
       res.json(users);
     } catch (e) {
-      console.error("---->", e);
       res.status(400);
       res.json({ msg: "" + e });
     }
@@ -51,9 +63,37 @@ class UserController {
     res.json({});
   }
 
-  deleteUserById(req, res) {}
+  deleteUserById(req = request, res = response) {
+    try {
+    } catch (e) {}
+  }
 
-  updateUserById(req, res) {}
+  async updateUserById(req = request, res = response) {
+    const { id } = req.params;
+    const user = req.body;
+    try {
+      const userDb = await Users.findById(id).exec();
+
+      console.log(userDb);
+
+      const updateUser = {};
+      if (userDb.userName != user.userName) updateUser.userName = user.userName;
+      if (userDb.email != user.email) updateUser.email = user.email;
+      if (userDb.password != user.password) updateUser.password = user.password;
+
+      updateUser.avatar = user.avatar;
+
+      console.log(updateUser);
+
+      await Users.updateOne({ _id: id }, updateUser);
+      const userResponse = await Users.findById(id).exec();
+      res.status(200);
+      res.json(userResponse);
+    } catch (e) {
+      res.status(400);
+      res.json({ msg: "" + e });
+    }
+  }
 
   login(req = request, res = response) {
     console.log("BODY: ", req.body);
