@@ -11,6 +11,6 @@ const router = Router();
     router.post('/rooms/:id/users', roomController.addUserOnRoom);
     router.get('/rooms/:id/users', roomController.addUserOnRoom);
 
-    router.post('/rooms/:id/delete-user', roomController.deleteUserOnRoom);
+    router.delete('/rooms/:id/users/:id_user', roomController.deleteUserOnRoom);
 
     module.exports = router;
