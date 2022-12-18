@@ -4,9 +4,9 @@ const { Users } = require("../database/schema/Users");
 const { mongoose } = require("mongoose");
 class UserController {
   async getAllUsers(req, res = response) {
-    res.status(200);
     // retorna todos los usuarios
     const users = await Users.find({});
+    res.status(200);
     res.json(users);
   }
 
@@ -55,36 +55,60 @@ class UserController {
       res.json({ msg: "" + e });
     }
   }
-
-  addScoresOnUser(req = request, res = response) {
+  /**
+   * Agregar un score al usuario
+   * @param {*} req
+   * @param {*} res
+   */
+  async addScoresOnUser(req = request, res = response) {
     const { id } = req.params;
+    const { score } = req.body;
     console.log("BODY: ", req.body, id);
-    res.status(200);
-    res.json({});
+    try {
+      //actualizamos el usuario con el score
+
+      await Users.updateOne({ _id: id }, { $addToSet: { scores: req.body } });
+      const userResponse = await Users.findById(id).exec();
+      res.status(200);
+      res.json(userResponse);
+    } catch (e) {
+      res.status(400);
+      res.json({ msg: "" + e });
+    }
   }
 
-  deleteUserById(req = request, res = response) {
+  async deleteUserById(req = request, res = response) {
+    const { id } = req.params;
     try {
-    } catch (e) {}
+      // await Users.findById(id).exec();
+      //borramos el usuario
+      console.log("el id es", id);
+      await Users.deleteOne({ _id: id });
+
+      res.status(204);
+      res.json();
+    } catch (e) {
+      res.status(400);
+      res.json({ msg: "" + e });
+    }
   }
 
   async updateUserById(req = request, res = response) {
     const { id } = req.params;
     const user = req.body;
     try {
-      const userDb = await Users.findById(id).exec();
-
-      console.log(userDb);
+      const userOriginal = await Users.findById(id).exec();
 
       const updateUser = {};
-      if (userDb.userName != user.userName) updateUser.userName = user.userName;
-      if (userDb.email != user.email) updateUser.email = user.email;
-      if (userDb.password != user.password) updateUser.password = user.password;
+      if (userOriginal.userName != user.userName)
+        updateUser.userName = user.userName;
+      if (userOriginal.email != user.email) updateUser.email = user.email;
+      if (userOriginal.password != user.password)
+        updateUser.password = user.password;
 
       updateUser.avatar = user.avatar;
 
-      console.log(updateUser);
-
+      //actualizamos el usuario
       await Users.updateOne({ _id: id }, updateUser);
       const userResponse = await Users.findById(id).exec();
       res.status(200);
@@ -95,22 +119,23 @@ class UserController {
     }
   }
 
-  login(req = request, res = response) {
+  async login(req = request, res = response) {
     console.log("BODY: ", req.body);
     const { email, password } = req.body;
-    console.log(email);
-    const existe = userData.users.find(
-      (u) => u.email == email && u.password == password
-    );
-    console.log("<<<<<" + existe);
-    if (existe != undefined) {
-      res.status(200);
-    } else if (existe == undefined) {
-      res.status(202);
-      res.json({ mssg: "The user does not exists! Please Sign-up!" });
-    } else res.status(400);
+    try {
+      const user = await Users.findOne({
+        email: email,
+        password: password,
+      }).exec();
 
-    res.json(existe);
+      if (!user) throw new Error("user with " + email + " not exits");
+
+      res.status(200);
+      res.json();
+    } catch (e) {
+      res.status(400);
+      res.json({ msg: "" + e });
+    }
   }
 }
 

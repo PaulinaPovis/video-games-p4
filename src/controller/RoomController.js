@@ -2,27 +2,50 @@ const { roomData } = require("../data/RoomData");
 const { request, response } = require("express");
 const { Rooms } = require("../database/schema/Rooms");
 class RoomController {
-  getAllRooms(req, res = response) {
+  
+  async getAllRooms(req, res = response) {
+    
+    // retorna todos las rooms
+    const rooms = await Rooms.find({});
     res.status(200);
-    res.json(roomData.rooms);
+    res.json(rooms);
+
   }
 
-  getRoomById(req = request, res = response) {
+  async getRoomById(req = request, res = response) {
+
     const { id } = req.params;
-    console.log("id " + id);
-    const room = roomData.rooms.find((u) => u.id == id);
-    console.log("room" + room);
-    res.status(200);
-    res.json(room);
+    try {
+      const room = await Rooms.findById(id).exec();
+
+      if(!room)
+        throw new Error("Room not found by id " + id);
+
+      res.status(200);
+      res.json(room);
+    } catch (e) {
+      console.error(e);
+      res.status(400);
+      res.json({ msg:  "Room not found by id " + id });
+     
+    }
+
   }
 
-  deleteRoomById(req = request, res = response) {
+  async deleteRoomById(req = request, res = response) {
+    
     const { id } = req.params;
-    console.log("id " + id);
-    const room = roomData.rooms.find((u) => u.id == id);
-    console.log("room" + room);
-    res.status(200);
-    res.json(room);
+    try {
+      //borramos el room
+      console.log("el id es", id);
+      await Rooms.deleteOne({ _id: id });
+      res.status(204);
+      res.json();
+    } catch (e) {
+      res.status(400);
+      res.json({ msg: "" + e });
+    }
+
   }
 
   updateRoomById(req = request, res = response) {
@@ -35,30 +58,18 @@ class RoomController {
   }
 
   createRoom(req = request, res = response) {
-
-
-    const room = req.body;
-    // obtener un id randon
-    room.id = Math.floor(Math.random() * 1000000) + 10;
-
-        //creando el objeto que se insertara en mongodb
-        const rooms = new Rooms({
-            id: 1244,
-            name:room.name,
-            description: room.description,
-            image: "shfdaf",
-            players: [player1,player2]
-          });
-          // guardando el objecto rooms en mongo
-          rooms.save(function (err) {
-              if (err) return handleError(err);
-              console.log("room created ....");
-            });
-
-
-    roomData.rooms.push(room);
-    res.status(200);
-    res.json(roomData.rooms);
+    try {
+      const room = req.body;
+      //creando el objeto que se insertara en mongodb
+      const rooms = new Rooms(req.body);
+      // guardando el objecto rooms en mongo
+      rooms.save();
+      res.status(200);
+      res.json(rooms);
+    } catch (e) {
+      res.status(400);
+      res.json({ msg: "" + e });
+    }
   }
 
   addUserOnRoom(req = request, res = response) {
