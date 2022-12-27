@@ -37,7 +37,7 @@ form.addEventListener('submit', (e) => {
             body: JSON.stringify(data),
             headers: new Headers(
                 {
-                   'Content-Type':  'application/json'
+                   'Content-Type': 'application/json'
                 }
             )          
         })

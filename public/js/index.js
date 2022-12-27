@@ -12,8 +12,9 @@ const userDetail = document.getElementById('user-detail');
 const user = WinStorage.getParsed('currentUser');
 
 if(user !== null && user !== undefined){
-    
-    fetch(`${basePath}/users/` + user.id)
+    console.log(user._id)
+    debugger
+    fetch(`${basePath}/users/` + user._id)
         .then(data => data.json())
         .then(response => {
             if(typeof response !== 'object'){
@@ -22,6 +23,7 @@ if(user !== null && user !== undefined){
 
                 userDetail.classList.add('hide');
                 userDetail.classList.remove('user-detail');
+                debugger
             }
             else{
                 //Si el usuario esta logueado se muestra el boton logout y se ocultan los botones login y register

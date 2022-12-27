@@ -19,10 +19,12 @@ function setRooms(){
         .then(response => {
 
             response.forEach((item, index) => {
-                elementRooms[index].id = item.id;
+                elementRooms[index].id = item._id;
                 titleRooms[index].innerHTML = item.name;
                 imageRooms[index].src = 'img/' + item.image + '.jpg';
             });
+
+            console.log(elementRooms)
 
             saveRoom();
 
@@ -72,10 +74,11 @@ function allowDrop(ev) {
 
 // Función que asigna un click a cada room y salva la room seleccionada en el localStorage
 function saveRoom(){
+    debugger
     elementRooms.forEach(element => {
         element.addEventListener('dragover', allowDrop);
         element.addEventListener('drop', (ev) => {
-            
+            console.log(element)
             //Previene el comportamiento por defecto del navegador
             ev.preventDefault();
             //Creamos una variable a la que se le asigna el valor de lo que contiene el objeto dataTransfer
@@ -114,8 +117,10 @@ function saveRoom(){
 
 
                         console.log(response)
-                        const room = response.find(item => item.id === Number(element.id));
-                        WinStorage.set('roomSelected', room);
+                        // const room = response.find(item => item.id === Number(element.id));
+                        // WinStorage.set('roomSelected', room);
+                        const room = response
+                        WinStorage.set('roomSelected', response);
 
                         //Animación jQuery
                         const alertMessage = 'You choose the ' + room.name + ' Press Go! to enter.';
@@ -124,10 +129,12 @@ function saveRoom(){
                         });
                         //Fin Animación jQuery
                         $('#btn-go').prop('disabled', false);
+
+                        const roomIdSubstract = room.name.substring(5);
                        
                         $( "#btn-go" ).click(function() {
 
-                            window.location.href = 'room' + room.id + '.html';
+                            window.location.href = 'room' + roomIdSubstract + '.html';
                           });
                         
                     }
@@ -170,7 +177,7 @@ function hideAlert(){
 
 //función asignar avatar escogido
 if(user !== null && user !== undefined){
-    fetch(`${basePath}/users/${user.id}`)
+    fetch(`${basePath}/users/${user._id}`)
             .then(data => data.json())
             .then(response => {
                 const image = document.querySelector('#avatar-output img');
