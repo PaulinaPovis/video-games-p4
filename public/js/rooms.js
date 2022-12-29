@@ -74,7 +74,6 @@ function allowDrop(ev) {
 
 // Función que asigna un click a cada room y salva la room seleccionada en el localStorage
 function saveRoom(){
-    debugger
     elementRooms.forEach(element => {
         element.addEventListener('dragover', allowDrop);
         element.addEventListener('drop', (ev) => {
@@ -103,8 +102,8 @@ function saveRoom(){
                 .then(data => data.json()) 
                 .then(response => {
 
-                    if(response.mssg && response.mssg === 'The room is full! Please choose another room!' || response.mssg && response.mssg === 'You are already in a room, please exit the room!'){
-                        errorMessage.innerHTML = response.mssg;
+                    if(response.msg){
+                        errorMessage.innerHTML = 'The room is full! Please choose another room!';
                         errorMessage.classList.remove('hide');
                         errorMessage.classList.add('show');
 
@@ -114,11 +113,7 @@ function saveRoom(){
                     else {
                         errorMessage.innerHTML = "";
                         console.log('Respuesta front fetch', response)
-
-
-                        console.log(response)
-                        // const room = response.find(item => item.id === Number(element.id));
-                        // WinStorage.set('roomSelected', room);
+                        
                         const room = response
                         WinStorage.set('roomSelected', response);
 

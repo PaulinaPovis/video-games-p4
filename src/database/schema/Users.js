@@ -2,7 +2,7 @@ const { mongoose } = require("mongoose");
 const schemaScore = new mongoose.Schema({
   percentage: {type:String,required:[true,'The percentage is mandatory']},
   playerRival: {type:String,required:[true,'The name of playerRival is mandatory']},
-  roomId: Number,
+  roomId: {type:String,required:[true,'The room is mandatory']},
   gameId: Number,
 });
 

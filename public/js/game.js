@@ -1,3 +1,4 @@
+import { basePath } from "./classes/api/base.js";
 import { GameServices } from "./classes/api/GameServices.js";
 import { Player } from "./classes/Player.js";
 import { WinStorage } from "./classes/WindowStorageManager.js";
@@ -28,6 +29,8 @@ const boardSquaresCanvas = document.querySelectorAll(`#room-${roomId} .board-ite
 document.querySelector('.header').classList.add('hide');
 document.querySelector('.footer').classList.add('hide');
 
+let playerOneData = {};
+let playerTwoData = {};
 let playerOneScore = 0;
 let playerTwoScore = 0;
 let gameId;
@@ -97,7 +100,6 @@ function setExitButton(){
     const btnExitRoom = document.querySelector(`#room-${roomId} .btn-exit-room`);
     btnExitRoom.style.display = 'inline-block';
     btnExitRoom.addEventListener('click', () => {
-        debugger
         GameServices.deleteGameById(gameId)
         .then(() => {
             //Datos para pasar al servicio
@@ -195,7 +197,6 @@ function startGame(args){
     // Aquí se podría pintar el tablero con los datos del JSON
     const {gamePLayers, json} = args;
 
-    console.log(json)
 
     // Añadimos el id del juego actual al local storage, será necesario si vamos a hacer logout después
     roomSelected.currentGameId = gameId;
@@ -223,14 +224,14 @@ function startGame(args){
       },1000);
 
     // Seteamos los datos del jugador
-    const playerOneData = gamePLayers[0];
+    playerOneData = gamePLayers[0];
     Object.assign(playerOneData, {boardPosition: 'left'});
     players[0] = new Player(playerOneData);
 
-    const playerTwoData = gamePLayers[1];
+    playerTwoData = gamePLayers[1];
     Object.assign(playerTwoData, {boardPosition: 'right'});
     players[1] = new Player(playerTwoData);
-    
+
     setPlayerOne();
     setPlayerTwo();
 
@@ -239,9 +240,7 @@ function startGame(args){
         
         //Asignamos un escuchador con el evento click a cada elemento del array
         element.addEventListener('click', function(event){
-            console.log(event)
             const boardItem = boardSquares[index]
-            console.log(boardItem)
             const cellSelected = Number(boardItem.id);
             setCell(cellSelected);
         });
@@ -254,10 +253,8 @@ function startGame(args){
  * @param {Number} cellNumber Número de la celda seleccionada
  */
 function setCell(cellNumber){
-    console.log(players)
     // const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(user.id));
     const currentPlayer = players.find(item => item.player.id == user._id);
-    debugger
     
     const data = {
         id: cellNumber,
@@ -304,20 +301,22 @@ function updateGame(args){
     //Pinta las celdas de su color correspondiente y calcula las puntuaciones
     json.cells.forEach((cell, index) => {
         if(cell.color !== 'NONE'){
-            // boardSquares[index].style.backgroundColor = cell.color;
             const currentCanvas = boardSquaresCanvas[index];
-            console.log(currentCanvas);
+
             let ctx = currentCanvas.getContext("2d");
             ctx.fillStyle = cell.color;
             ctx.fillRect(0, 0, currentCanvas.width, currentCanvas.height);
             if(currentPlayer.player.color === cell.color && currentPlayer.player.boardPosition === 'left'){
                 scoreOne++;
                 playerOneScore = scoreOne;
+                currentPlayer.player.score = scoreOne;
             }
             if(currentPlayer.player.color === cell.color && currentPlayer.player.boardPosition === 'right'){
                 scoreTwo++;
                 playerTwoScore = scoreTwo;
+                currentPlayer.player.score = scoreTwo;
             }
+
         }
     });
 
@@ -348,10 +347,44 @@ function updateGame(args){
             winText.innerHTML = `${players[1].player.userName} wins!!`;
         }
 
+        const currentPlayer = players.find(item => item.player.id == user._id);
+        setScore(currentPlayer)
+
         //Mostramos el botón de salir del juego
         setExitButton();
+
     }
+    
 }
+
+
+function setScore(player){
+    const rival = players.find(item => item.player.id !== player.player.id)
+    const data = {
+        percentage: `${setPercentage(player.player.score)}%`,
+        playerRival: rival.player.userName,
+        roomId: roomSelected._id,
+        gameId: gameId
+    }
+
+    fetch(`${basePath}/users/${player.player.id}/scores`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: new Headers(
+            {
+            'Content-Type':  'application/json'
+            }
+        )           
+    })
+    .then(data => data.json()) 
+    .then(response => {
+        console.log('Respuesta front fetch', response)
+    })
+    .catch(err => {
+        console.log('Error fetch front', err);
+    })
+};
+
 
 
 // Acción que calcula el porcentaje
