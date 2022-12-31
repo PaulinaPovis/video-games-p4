@@ -1,6 +1,8 @@
 import { basePath } from "./classes/api/base.js";
 import { WinStorage } from "./classes/WindowStorageManager.js";
 
+const socket = io();
+
 const elementRooms = document.querySelectorAll('.card');
 const titleRooms = document.querySelectorAll('.card-text');
 const imageRooms = document.querySelectorAll('.card-header img');
@@ -22,6 +24,17 @@ function setRooms(){
                 elementRooms[index].id = item._id;
                 titleRooms[index].innerHTML = item.name;
                 imageRooms[index].src = 'img/' + item.image + '.jpg';
+            });
+
+            response.forEach((element, index) => {
+                element.players.forEach(player => {
+
+                    socket.emit(`rooms::show-avatars`, ({
+                        roomId: element._id,
+                        user: player
+                    }));
+
+                })
             });
 
             console.log(elementRooms)
@@ -112,7 +125,7 @@ function saveRoom(){
                     }
                     else {
                         errorMessage.innerHTML = "";
-                        console.log('Respuesta front fetch', response)
+                        //console.log('Respuesta front fetch', response)
                         
                         const room = response
                         WinStorage.set('roomSelected', response);
@@ -125,12 +138,18 @@ function saveRoom(){
                         //Fin Animación jQuery
                         $('#btn-go').prop('disabled', false);
 
+                        const currentUserToJson = JSON.parse(currentUser);
+
                         const roomIdSubstract = room.name.substring(5);
                        
                         $( "#btn-go" ).click(function() {
-
                             window.location.href = 'room' + roomIdSubstract + '.html';
-                          });
+                        });
+
+                        socket.emit(`rooms::show-avatars`, ({
+                            roomId: room._id,
+                            user: currentUserToJson
+                        }));
                         
                     }
                     
@@ -148,6 +167,43 @@ function saveRoom(){
 
     });
 };
+
+socket.on(`rooms::show-avatars`, (args) => {
+    console.log('llega al emit: ', args)
+    setAvatarsInRooms(args)
+});
+
+socket.on('game::exit', (args) => {
+    deleteAvatar(args)
+});
+
+function setAvatarsInRooms(data){
+    console.log('setAvatarsInRooms: ' ,data)
+    const cardFooter = document.querySelector(`[id='${data.roomId}'] .card-footer`);
+    const hasImages = document.querySelectorAll(`[id='${data.roomId}'] .avatar-room-drop img`);
+
+    console.log('hasImages', hasImages)
+    if(!hasImages || hasImages.length < 2){
+        // debugger
+        const imgExist = document.getElementById(`avatar-room-drop-img-${data.user.avatar._id}`)
+        if(imgExist == null || imgExist == undefined){
+            const avatarRoomImgWrapper = document.createElement("div");
+            avatarRoomImgWrapper.classList.add('avatar-room-drop');
+            avatarRoomImgWrapper.setAttribute('id', `avatar-room-drop-${data.user.avatar._id}`);
+            avatarRoomImgWrapper.innerHTML = `
+            <img id="avatar-room-drop-img-${data.user.avatar._id}" src="img/avatar-${data.user.avatar.id}.jpg">
+            <span>${data.user.userName}</span>
+            `;
+            cardFooter.appendChild(avatarRoomImgWrapper);
+        }
+    }
+    
+}
+
+function deleteAvatar(data){
+    console.log('Delete: ', data)
+    document.getElementById(`avatar-room-drop-${data.user.avatar._id}`).remove()
+}
 
 //Función mostrar alerta animación jQuery
 function showAlert(type, text, animation) {

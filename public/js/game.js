@@ -113,6 +113,13 @@ function setExitButton(){
                 document.querySelector('.header').classList.remove('hide');
                 document.querySelector('.footer').classList.remove('hide');
                 WinStorage.removeItem('roomSelected');
+
+                socket.emit('game::exit', ({
+                    user: user,
+                    roomId: roomSelected._id
+
+                }));
+
                 window.location.href = '/rooms.html';
             })
             .catch(err => {

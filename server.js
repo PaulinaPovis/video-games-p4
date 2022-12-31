@@ -45,6 +45,21 @@ io.on('connection', (socket) => {
     console.log('new connection', socket.id);
 
     console.log(gameJson)
+
+    //Rooms
+    socket.on('rooms::show-avatars', (args) => {
+        console.log('rooms::show-avatars: ',args)
+        const data = args;
+        io.sockets.emit('rooms::show-avatars', (data))
+    });
+
+    //Game exit
+    socket.on('game::exit', (args) => {
+        console.log('game::exit: ',args)
+        const data = args;
+        io.sockets.emit('game::exit', (data))
+    });
+
     //Room 1
     socket.on('game::start-1', (args) => {
         console.log(args)

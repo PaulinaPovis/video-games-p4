@@ -141,6 +141,28 @@ h2{
     transition: transform 3s ease-in-out;
 }
 
+.card-footer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px;
+}
+
+.avatar-room-drop {
+    text-align: center;
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.avatar-room-drop img{
+    max-width: 50px;
+    border-radius: 100%;
+    box-shadow: 2px 2px 6px rgb(0 122 153 / 53%);
+}
+
 .success{
     background-color: #62eba6;
 }

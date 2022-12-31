@@ -21,28 +21,34 @@ block content
                             img.img-top.img-fluid(alt="table1")
                         .card-body
                             p.card-text
+                        .card-footer
+                        .card-players
                 .col-12.col-md-6.mb-3
                     .card.btn
                         .card-header
                             img.img-top.img-fluid(alt="table2")
                         .card-body
                             p.card-text
+                        .card-footer
                 .col-12.col-md-6.mb-3.mb-md-0
                     .card.btn
                         .card-header
                             img.img-top.img-fluid(alt="table3")
                         .card-body
                             p.card-text
+                        .card-footer
                 .col-12.col-md-6
                     .card.btn
                         .card-header
                             img.img-top.img-fluid(alt="table4")
                         .card-body
                             p.card-text
+                        .card-footer
             button.w-100.mb-2.btn.btn-lg.rounded-3.btn-primary(id="btn-go", type="button") Go!
     .alert-room
 
 block pageScripts 
     script(src="../js/libs/jquery.js")
+    script(src="socket.io/socket.io.js") 
     script(src="../js/index.js", type="module")
     script(src="../js/rooms.js", type="module")
