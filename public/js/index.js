@@ -12,8 +12,8 @@ const userDetail = document.getElementById('user-detail');
 const user = WinStorage.getParsed('currentUser');
 
 if(user !== null && user !== undefined){
-    
-    fetch(`${basePath}/users/` + user.id)
+    console.log(user._id)
+    fetch(`${basePath}/users/` + user._id)
         .then(data => data.json())
         .then(response => {
             if(typeof response !== 'object'){

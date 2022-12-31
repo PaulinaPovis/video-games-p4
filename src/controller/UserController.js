@@ -131,7 +131,7 @@ class UserController {
       if (!user) throw new Error("user with " + email + " not exits");
 
       res.status(200);
-      res.json();
+      res.json(user);
     } catch (e) {
       res.status(400);
       res.json({ msg: "" + e });

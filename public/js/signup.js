@@ -90,18 +90,18 @@ form.addEventListener('submit', (e) => {
         })
         .then(data => data.json()) 
         .then(response => {
-            if(response.mssg && response.mssg === 'The user already exists!'){
-                errorMessage.innerHTML = response.mssg;
+            if(response.msg){
+                errorMessage.innerHTML = 'The user already exists!';
                 errorMessage.classList.remove('hide');
                 errorMessage.classList.add('show');
             }
             else{
                 //Limpiamos los campos
                 document.getElementById("signup").reset();
-                //TODO: Eliminar cuando está la conexión con la BBDD
+                
                 //Simulación de una BBDD guardando los datos en localstorage.
                 WinStorage.set('currentUser', response)
-                //TODO: Fin
+                
                 window.location.href = '/login.html';
             }
             console.log('Respuesta front fetch', response)

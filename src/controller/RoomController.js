@@ -109,19 +109,32 @@ class RoomController {
 
     console.log("idRoom delete ", id, id_user);
     try {
-      const room = await Rooms.findById(id).exec();
-      // si no existe el room que se envia damos error porque no se puede agregar usuario
-      if (!room) throw new Error("Room not found by id " + id);
+      // const room = await Rooms.findById(id).exec();
+      // // si no existe el room que se envia damos error porque no se puede agregar usuario
+      // if (!room) throw new Error("Room not found by id " + id);
 
-      const playerUpdated = room.players.filter((p) => p.id != id_user);
+      // const playerUpdated = room.players.filter((p) => p.id != id_user);
 
-      await Rooms.updateOne({ _id: id }, { $set: { players: null } });
+      // await Rooms.updateOne({ _id: id }, { $set: { players: null } });
 
-      if (playerUpdated.length > 0)
-        await Rooms.updateOne(
-          { _id: id },
-          { $set: { players: playerUpdated } }
-        );
+      // if (playerUpdated.length > 0)
+      //   await Rooms.updateOne(
+      //     { _id: id },
+      //     { $set: { players: playerUpdated } }
+      //   );
+      // await Rooms.updateOne({_id: id}, {$pull: {players: id_user}})
+
+      // await Rooms.updateOne({ _id: id.trim() }, {
+      //     $pullAll: {
+      //       players: [{_id: id_user.trim()}],
+      //     },
+      // });
+
+      const room = await Rooms.updateOne({ _id: id.trim() }, {
+            $pull: {
+              players: {_id: id_user.trim()},
+            },
+        });
     
       res.status(204);
       res.json();

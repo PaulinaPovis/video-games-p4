@@ -108,7 +108,7 @@ export class GameServices{
      */
     static deletePLayerOnRoom(data, roomId){
         return new Promise((resolve, reject) => {
-            ApiManager.post(`${basePath}/rooms/${roomId}/delete-user`, data)
+            ApiManager.delete(`${basePath}/rooms/${roomId}/users/${data._id}`, data)
             .then(response => resolve(response))
             .catch(err => reject(err))
         });

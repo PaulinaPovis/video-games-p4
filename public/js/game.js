@@ -1,3 +1,4 @@
+import { basePath } from "./classes/api/base.js";
 import { GameServices } from "./classes/api/GameServices.js";
 import { Player } from "./classes/Player.js";
 import { WinStorage } from "./classes/WindowStorageManager.js";
@@ -8,25 +9,28 @@ const socket = io();
 const user = WinStorage.getParsed('currentUser');
 const roomSelected = WinStorage.getParsed('roomSelected');
 //Nodos para setear los boards
-const userNameLeft = document.querySelector(`#room-${roomSelected.id} #board-user-left`);
-const userBoardLeft = document.querySelector(`#room-${roomSelected.id} .user-board-left`);
-const userBoardLeftScore = document.querySelector(`#room-${roomSelected.id} .user-board-left .user-score .text`);
-const userBoardLeftPercentage = document.querySelector(`#room-${roomSelected.id} .user-board-left .user-percentage .text`);
-const userBoardLeftNoUser = document.querySelector(`#room-${roomSelected.id} .user-board-left-no-user`);
-const svgLeft = document.querySelectorAll(`#room-${roomSelected.id} #svg-left path`);
-const userNameRight = document.querySelector(`#room-${roomSelected.id} #board-user-right`);
-const userBoardRight = document.querySelector(`#room-${roomSelected.id} .user-board-right`);
-const userBoardRightScore = document.querySelector(`#room-${roomSelected.id} .user-board-right .user-score .text`);
-const userBoardRightPercentage = document.querySelector(`#room-${roomSelected.id} .user-board-right .user-percentage .text`);
-const userBoardRightNoUser = document.querySelector(`#room-${roomSelected.id} .user-board-right-no-user`);
-const svgRight = document.querySelectorAll(`#room-${roomSelected.id} #svg-right path`);
-const winText = document.querySelector(`#room-${roomSelected.id} .final`);
-const boardSquares = document.querySelectorAll(`#room-${roomSelected.id} .board-item`);
-const boardSquaresCanvas = document.querySelectorAll(`#room-${roomSelected.id} .board-item canvas`);
+const roomId = roomSelected.name.substring(5);
+const userNameLeft = document.querySelector(`#room-${roomId} #board-user-left`);
+const userBoardLeft = document.querySelector(`#room-${roomId} .user-board-left`);
+const userBoardLeftScore = document.querySelector(`#room-${roomId} .user-board-left .user-score .text`);
+const userBoardLeftPercentage = document.querySelector(`#room-${roomId} .user-board-left .user-percentage .text`);
+const userBoardLeftNoUser = document.querySelector(`#room-${roomId} .user-board-left-no-user`);
+const svgLeft = document.querySelectorAll(`#room-${roomId} #svg-left path`);
+const userNameRight = document.querySelector(`#room-${roomId} #board-user-right`);
+const userBoardRight = document.querySelector(`#room-${roomId} .user-board-right`);
+const userBoardRightScore = document.querySelector(`#room-${roomId} .user-board-right .user-score .text`);
+const userBoardRightPercentage = document.querySelector(`#room-${roomId} .user-board-right .user-percentage .text`);
+const userBoardRightNoUser = document.querySelector(`#room-${roomId} .user-board-right-no-user`);
+const svgRight = document.querySelectorAll(`#room-${roomId} #svg-right path`);
+const winText = document.querySelector(`#room-${roomId} .final`);
+const boardSquares = document.querySelectorAll(`#room-${roomId} .board-item`);
+const boardSquaresCanvas = document.querySelectorAll(`#room-${roomId} .board-item canvas`);
 
 document.querySelector('.header').classList.add('hide');
 document.querySelector('.footer').classList.add('hide');
 
+let playerOneData = {};
+let playerTwoData = {};
 let playerOneScore = 0;
 let playerTwoScore = 0;
 let gameId;
@@ -57,7 +61,7 @@ function initGame(){
                 
                 response.forEach(item => {
                     //Si existe un juego con el id de nuestro room añadimos un jugador
-                    if(item.room.id == roomSelected.id){
+                    if(item.room.id == roomId){
                         gameExist = true;
                         gameId = item.id;
                         
@@ -93,22 +97,29 @@ initGame();
  */
 function setExitButton(){
     // Acción para sacar a un jugador de la sala
-    const btnExitRoom = document.querySelector(`#room-${roomSelected.id} .btn-exit-room`);
+    const btnExitRoom = document.querySelector(`#room-${roomId} .btn-exit-room`);
     btnExitRoom.style.display = 'inline-block';
     btnExitRoom.addEventListener('click', () => {
         GameServices.deleteGameById(gameId)
         .then(() => {
             //Datos para pasar al servicio
             const data = {
-                id: user.id,
+                _id: user._id,
                 userName: user.userName
             };
-            GameServices.deletePLayerOnRoom(data, roomSelected.id)
+            GameServices.deletePLayerOnRoom(data, roomSelected._id)
             .then(() => {
                 // Borramos los datos del room en el localStorage
                 document.querySelector('.header').classList.remove('hide');
                 document.querySelector('.footer').classList.remove('hide');
                 WinStorage.removeItem('roomSelected');
+
+                socket.emit('game::exit', ({
+                    user: user,
+                    roomId: roomSelected._id
+
+                }));
+
                 window.location.href = '/rooms.html';
             })
             .catch(err => {
@@ -128,12 +139,12 @@ function createNewGame(){
     //Datos para pasar al servicio
     const data = {
         player: {
-            id: user.id,
+            id: user._id,
             userName: user.userName,
             email: user.email
         },
         room: {
-            id: roomSelected.id,
+            id: roomId,
             name: roomSelected.name
         }
     };
@@ -159,7 +170,7 @@ function createNewGame(){
 function addNewPlayerOnGame(gameId){
 
     const data = {
-        id: user.id,
+        id: user._id,
         userName: user.userName,
         email: user.email
     };
@@ -167,12 +178,12 @@ function addNewPlayerOnGame(gameId){
     GameServices.addPlayerOnGame(data, gameId)
     .then(() => {
         //Ocultamos el botón de salir del juego
-        document.querySelector(`#room-${roomSelected.id} .btn-exit-room`).style.display = 'none';
+        document.querySelector(`#room-${roomId} .btn-exit-room`).style.display = 'none';
 
         GameServices.getGameById(gameId)
         .then(response => {
             // Socket envía mensaje al server para iniciar el juego
-            socket.emit(`game::start-${roomSelected.id}`, (response.players));
+            socket.emit(`game::start-${roomId}`, (response.players));
             
         })
         .catch(err => console.log(err))
@@ -184,7 +195,7 @@ function addNewPlayerOnGame(gameId){
 };
 
 // Socket recibe mensaje del server para iniciar el juego
-socket.on(`game::start-${roomSelected.id}`, (args) => {
+socket.on(`game::start-${roomId}`, (args) => {
     startGame(args)
 });
 
@@ -193,19 +204,18 @@ function startGame(args){
     // Aquí se podría pintar el tablero con los datos del JSON
     const {gamePLayers, json} = args;
 
-    console.log(json)
 
     // Añadimos el id del juego actual al local storage, será necesario si vamos a hacer logout después
     roomSelected.currentGameId = gameId;
     WinStorage.set('roomSelected', roomSelected);
 
     //Animación del contador para empezar a jugar
-    const countDown = document.querySelector(`#room-${roomSelected.id} .countdown`);
-    const countDownMsg = document.querySelector(`#room-${roomSelected.id} .countdown .msg`);
+    const countDown = document.querySelector(`#room-${roomId} .countdown`);
+    const countDownMsg = document.querySelector(`#room-${roomId} .countdown .msg`);
     countDown.classList.add('show');
     
     //Ocultamos el botón de salir del juego
-    document.querySelector(`#room-${roomSelected.id} .btn-exit-room`).style.display = 'none';
+    document.querySelector(`#room-${roomId} .btn-exit-room`).style.display = 'none';
 
     const arrMessages = ['Ready', '3', '2', '1', 'Go!'];
     let msg;
@@ -221,14 +231,14 @@ function startGame(args){
       },1000);
 
     // Seteamos los datos del jugador
-    const playerOneData = gamePLayers[0];
+    playerOneData = gamePLayers[0];
     Object.assign(playerOneData, {boardPosition: 'left'});
     players[0] = new Player(playerOneData);
 
-    const playerTwoData = gamePLayers[1];
+    playerTwoData = gamePLayers[1];
     Object.assign(playerTwoData, {boardPosition: 'right'});
     players[1] = new Player(playerTwoData);
-    
+
     setPlayerOne();
     setPlayerTwo();
 
@@ -237,9 +247,7 @@ function startGame(args){
         
         //Asignamos un escuchador con el evento click a cada elemento del array
         element.addEventListener('click', function(event){
-            console.log(event)
             const boardItem = boardSquares[index]
-            console.log(boardItem)
             const cellSelected = Number(boardItem.id);
             setCell(cellSelected);
         });
@@ -252,7 +260,8 @@ function startGame(args){
  * @param {Number} cellNumber Número de la celda seleccionada
  */
 function setCell(cellNumber){
-    const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(user.id));
+    // const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(user.id));
+    const currentPlayer = players.find(item => item.player.id == user._id);
     
     const data = {
         id: cellNumber,
@@ -264,7 +273,7 @@ function setCell(cellNumber){
         if(!response.msg){
             
             // Emitimos mensaje al server para colocar la celda
-            socket.emit(`game::set-cell-${roomSelected.id}`, ({
+            socket.emit(`game::set-cell-${roomId}`, ({
                 cellNumber: cellNumber,
                 currentPlayer: currentPlayer,
                 gameId: gameId
@@ -281,7 +290,7 @@ function setCell(cellNumber){
 };
 
 // Recibimos mensaje al server para actualizar los datos del juego
-socket.on(`game::set-cell-${roomSelected.id}`, (args) => {
+socket.on(`game::set-cell-${roomId}`, (args) => {
     updateGame(args);
 });
 
@@ -291,27 +300,30 @@ socket.on(`game::set-cell-${roomSelected.id}`, (args) => {
  */
 function updateGame(args){
     const {gamePlayercurrentPlayer, json} = args;
-    const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(gamePlayercurrentPlayer.player.id));
+    //const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(gamePlayercurrentPlayer.player.id));
+    const currentPlayer = players.find(item => item.player.id == gamePlayercurrentPlayer.player.id);
     let scoreOne = 0;
     let scoreTwo = 0;
 
     //Pinta las celdas de su color correspondiente y calcula las puntuaciones
     json.cells.forEach((cell, index) => {
         if(cell.color !== 'NONE'){
-            // boardSquares[index].style.backgroundColor = cell.color;
             const currentCanvas = boardSquaresCanvas[index];
-            console.log(currentCanvas);
+
             let ctx = currentCanvas.getContext("2d");
             ctx.fillStyle = cell.color;
             ctx.fillRect(0, 0, currentCanvas.width, currentCanvas.height);
             if(currentPlayer.player.color === cell.color && currentPlayer.player.boardPosition === 'left'){
                 scoreOne++;
                 playerOneScore = scoreOne;
+                currentPlayer.player.score = scoreOne;
             }
             if(currentPlayer.player.color === cell.color && currentPlayer.player.boardPosition === 'right'){
                 scoreTwo++;
                 playerTwoScore = scoreTwo;
+                currentPlayer.player.score = scoreTwo;
             }
+
         }
     });
 
@@ -342,10 +354,44 @@ function updateGame(args){
             winText.innerHTML = `${players[1].player.userName} wins!!`;
         }
 
+        const currentPlayer = players.find(item => item.player.id == user._id);
+        setScore(currentPlayer)
+
         //Mostramos el botón de salir del juego
         setExitButton();
+
     }
+    
 }
+
+
+function setScore(player){
+    const rival = players.find(item => item.player.id !== player.player.id)
+    const data = {
+        percentage: `${setPercentage(player.player.score)}%`,
+        playerRival: rival.player.userName,
+        roomId: roomSelected._id,
+        gameId: gameId
+    }
+
+    fetch(`${basePath}/users/${player.player.id}/scores`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: new Headers(
+            {
+            'Content-Type':  'application/json'
+            }
+        )           
+    })
+    .then(data => data.json()) 
+    .then(response => {
+        console.log('Respuesta front fetch', response)
+    })
+    .catch(err => {
+        console.log('Error fetch front', err);
+    })
+};
+
 
 
 // Acción que calcula el porcentaje

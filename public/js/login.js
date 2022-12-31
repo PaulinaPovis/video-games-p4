@@ -37,15 +37,15 @@ form.addEventListener('submit', (e) => {
             body: JSON.stringify(data),
             headers: new Headers(
                 {
-                   'Content-Type':  'application/json'
+                   'Content-Type': 'application/json'
                 }
             )          
         })
         .then(data => data.json()) 
         .then(response => {
 
-            if(response.mssg && response.mssg === 'The user does not exists! Please Sign-up!'){
-                errorMessage.innerHTML = response.mssg;
+            if(response.msg){
+                errorMessage.innerHTML = 'The user does not exists! Please Sign-up!';
                 errorMessage.classList.remove('hide');
                 errorMessage.classList.add('show');
             }
