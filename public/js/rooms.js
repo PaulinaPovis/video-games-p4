@@ -37,8 +37,6 @@ function setRooms(){
                 })
             });
 
-            console.log(elementRooms)
-
             saveRoom();
 
         })
@@ -125,7 +123,6 @@ function saveRoom(){
                     }
                     else {
                         errorMessage.innerHTML = "";
-                        //console.log('Respuesta front fetch', response)
                         
                         const room = response
                         WinStorage.set('roomSelected', response);
@@ -182,10 +179,8 @@ function setAvatarsInRooms(data){
     const cardFooter = document.querySelector(`[id='${data.roomId}'] .card-footer`);
     const hasImages = document.querySelectorAll(`[id='${data.roomId}'] .avatar-room-drop img`);
 
-    console.log('hasImages', hasImages)
     if(!hasImages || hasImages.length < 2){
-        // debugger
-        const imgExist = document.getElementById(`avatar-room-drop-img-${data.user.avatar._id}`)
+        const imgExist = document.getElementById(`avatar-room-drop-img-${data.user.avatar._id}`);
         if(imgExist == null || imgExist == undefined){
             const avatarRoomImgWrapper = document.createElement("div");
             avatarRoomImgWrapper.classList.add('avatar-room-drop');
@@ -201,18 +196,17 @@ function setAvatarsInRooms(data){
 }
 
 function deleteAvatar(data){
-    console.log('Delete: ', data)
-    document.getElementById(`avatar-room-drop-${data.user.avatar._id}`).remove()
+    document.getElementById(`avatar-room-drop-${data.user.avatar._id}`).remove();
 }
 
 //Función mostrar alerta animación jQuery
 function showAlert(type, text, animation) {
     const alertRoom = $('.alert-room');
     if(type === 'success'){
-        alertRoom.removeClass('unsuccess')
+        alertRoom.removeClass('unsuccess');
     }
     else{
-        alertRoom.removeClass('success')
+        alertRoom.removeClass('success');
     }
     alertRoom.addClass(type);
     alertRoom.text(text);

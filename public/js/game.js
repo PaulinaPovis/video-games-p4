@@ -77,7 +77,7 @@ function initGame(){
 
             if(gameExist){
                 
-                addNewPlayerOnGame(gameId)
+                addNewPlayerOnGame(gameId);
             }
             if(!gameExist && !isGameCreated){
                 
@@ -260,7 +260,6 @@ function startGame(args){
  * @param {Number} cellNumber Número de la celda seleccionada
  */
 function setCell(cellNumber){
-    // const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(user.id));
     const currentPlayer = players.find(item => item.player.id == user._id);
     
     const data = {
@@ -300,7 +299,6 @@ socket.on(`game::set-cell-${roomId}`, (args) => {
  */
 function updateGame(args){
     const {gamePlayercurrentPlayer, json} = args;
-    //const currentPlayer = players.find(player => Object.keys(player).length && Number(player.player.id) === Number(gamePlayercurrentPlayer.player.id));
     const currentPlayer = players.find(item => item.player.id == gamePlayercurrentPlayer.player.id);
     let scoreOne = 0;
     let scoreTwo = 0;
@@ -355,7 +353,7 @@ function updateGame(args){
         }
 
         const currentPlayer = players.find(item => item.player.id == user._id);
-        setScore(currentPlayer)
+        setScore(currentPlayer);
 
         //Mostramos el botón de salir del juego
         setExitButton();

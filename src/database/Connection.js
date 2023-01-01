@@ -11,10 +11,10 @@ class Connection {
 
         try {
             await mongoose.connect(MONGO_CONNECTION_URL);
-           // mongoose.connection.useDb('videosgames');
+           //mongoose.connection.useDb('videogames');
 
-           // mongoose.useDb(MONGO_DATABASE);
-           // mongoose.set('strictQuery',false);
+          //mongoose.useDb(MONGO_DATABASE);
+           mongoose.set('strictQuery',false);
             console.log('Mongo is connected');
         } catch (error) {
             console.error(error);

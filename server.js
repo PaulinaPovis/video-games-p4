@@ -14,8 +14,6 @@ const { connection } = require('./src/database/Connection');
 
 
 
-
-
 //MiddleWares
 app.use(morgan('tiny'));
 app.use(cors());
@@ -28,8 +26,6 @@ app.use( express.static('public'));
 
 
 
-
-// const server = app.listen(3000,()=>{console.log("Servidor arrancado en el puerto 3000")});
 httpServer.listen(3000);
 
 
